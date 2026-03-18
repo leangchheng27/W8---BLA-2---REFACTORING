@@ -1,4 +1,4 @@
-import 'package:blabla/services/location_service.dart';
+import '../../../data/repositories/location/location_repository.dart';
 import 'package:blabla/ui/widgets/display/bla_divider.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +9,9 @@ import '../../theme/theme.dart';
 /// A  Location Picker is a view to pick a Location:
 ///
 class BlaLocationPicker extends StatefulWidget {
-  const BlaLocationPicker({super.key, required this.initLocation});
+  const BlaLocationPicker({super.key, required this.locationRepository, required this.initLocation});
+
+  final LocationRepository locationRepository;
 
   final Location? initLocation; // optional initial location
 
@@ -47,18 +49,9 @@ class _BlaLocationPickerState extends State<BlaLocationPicker> {
   }
 
   List<Location> get filteredLocation {
-    if (currentSearchText.length < 2) {
-      return [];
-    }
-    return LocationsService.availableLocations
-        .where(
-          (location) => location.name.toUpperCase().contains(
-            currentSearchText.toUpperCase(),
-          ),
-        )
-        .toList();
+    return widget.locationRepository.searchLocations(currentSearchText);
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

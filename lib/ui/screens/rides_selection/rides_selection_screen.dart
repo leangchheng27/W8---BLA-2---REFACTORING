@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../model/ride/ride.dart';
 import '../../../model/ride_pref/ride_pref.dart';
-import '../../../services/ride_prefs_service.dart';
-import '../../../services/rides_service.dart';
+import '../../../main_common.dart';
 import '../../../utils/animations_util.dart' show AnimationUtils;
 import '../../theme/theme.dart';
 import 'widgets/ride_preference_modal.dart';
@@ -16,13 +15,28 @@ import 'widgets/rides_selection_tile.dart';
 ///   -  activate some filters.
 ///
 class RidesSelectionScreen extends StatefulWidget {
-  const RidesSelectionScreen({super.key});
+  const RidesSelectionScreen({
+    super.key,
+    required this.dependencies,
+    required this.selectedPreference,
+  });
+
+  final AppDependencies dependencies;
+  final RidePreference selectedPreference;
 
   @override
   State<RidesSelectionScreen> createState() => _RidesSelectionScreenState();
 }
 
 class _RidesSelectionScreenState extends State<RidesSelectionScreen> {
+  late RidePreference currentSelectedPreference;
+
+  @override
+  void initState() {
+    super.initState();
+    currentSelectedPreference = widget.selectedPreference;
+  }
+
   void onBackTap() {
     Navigator.pop(context);
   }
@@ -35,27 +49,31 @@ class _RidesSelectionScreenState extends State<RidesSelectionScreen> {
     // Later
   }
 
-  RidePreference get selectedRidePreference =>
-      RidePrefsService.selectedPreference!; // not null at this state
+  RidePreference get selectedRidePreference => currentSelectedPreference;
 
   List<Ride> get matchingRides =>
-      RidesService.getRidesFor(selectedRidePreference);
+      widget.dependencies.rideRepository.getRidesFor(selectedRidePreference);
 
   void onPreferencePressed() async {
     // 1 - Navigate to the rides preference picker
     RidePreference? newPreference = await Navigator.of(context)
         .push<RidePreference>(
           AnimationUtils.createRightToLeftRoute(
-            RidePreferenceModal(initialPreference: selectedRidePreference),
+            RidePreferenceModal(
+              initialPreference: selectedRidePreference,
+              locationRepository: widget.dependencies.locationRepository,
+              maxAllowedSeats: widget.dependencies.maxAllowedSeats,
+            ),
           ),
         );
 
     if (newPreference != null) {
-      // 2 - Ask the service to update the current preference
-      RidePrefsService.selectPreference(newPreference);
+      widget.dependencies.ridePreferenceRepository.savePreference(newPreference);
 
       // 3 -   Update the widget state  - TODO Improve this with proper state managagement
-      setState(() {});
+      setState(() {
+        currentSelectedPreference = newPreference;
+      });
     }
   }
 
