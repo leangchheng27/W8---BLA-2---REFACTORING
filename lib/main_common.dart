@@ -4,9 +4,18 @@ import 'data/repositories/ride/ride_repository.dart';
 import 'data/repositories/ride_preference/ride_preference_repository.dart';
 import 'ui/screens/home/home_screen.dart';
 import 'ui/theme/theme.dart';
+import 'package:provider/provider.dart';
+import 'ui/states/ride_preference_state.dart';
 
 void mainCommon(AppDependencies dependencies) {
-  runApp(BlaBlaApp(dependencies: dependencies));
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => RidePreferenceState(
+        ridePreferenceRepository: dependencies.ridePreferenceRepository,
+      ),
+      child: BlaBlaApp(dependencies: dependencies),
+    ),
+  );
 }
 
 class AppDependencies {
