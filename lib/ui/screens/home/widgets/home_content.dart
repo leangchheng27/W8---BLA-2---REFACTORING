@@ -27,7 +27,6 @@ class HomeContent extends StatelessWidget {
       AnimationUtils.createBottomToTopRoute(
         RidesSelectionScreen(
           dependencies: dependencies,
-          selectedPreference: newPreference,
         ),
       ),
     );
